@@ -14,6 +14,7 @@ math = true
 
 +++
 
+
 {{< figure src="/images/object-recognition/cifar10_grid.png" width="25%" >}}
 
 
@@ -50,11 +51,11 @@ The table below summarizes the patching and embedding process with a concrete ex
 | add class token embedding | $[B, 1+ H' \times W', D]$ |  $[1, 197, 512]$
 
 
-### Multi-Headed Self-Attention
-
-[Multi-Headed Self-Attention (MHSA)](https://arxiv.org/abs/1706.03762)
 
 ### Transformer
+
+**Attention.** The ViT uses [Multi-Headed Self-Attention (MHSA)](https://arxiv.org/abs/1706.03762)
+
 
 ### Classifier
 
