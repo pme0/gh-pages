@@ -5,7 +5,7 @@ slug = "projects"
 
 
 
-[Spoken Word Recognition]({{< ref "/page/spoken-word-recognition" >}})
+#[Spoken Word Recognition]({{< ref "/page/spoken-word-recognition" >}})
 
 
 
