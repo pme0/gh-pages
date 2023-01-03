@@ -14,12 +14,12 @@ enableEmoji = true
 [params]    
 author = "" #pme0
 # license = '<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA-4.0</a>'
-description = "pme0's website"
+description = ""
 keywords = ""
 info = ["Machine Learning & AI", ""]
 #avatarURL = "images/avatar.jpg"
 #gravatar = "john.doe@example.com"
-dateFormat = "January 2, 2006"
+dateFormat = "January 2006"
 since = 2022
 # Git Commit in Footer, uncomment the line below to enable it
 commit = "https://github.com/luizdepra/hugo-coder/tree/"
