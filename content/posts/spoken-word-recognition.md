@@ -19,16 +19,19 @@ math = true
 
 ## Introduction 
 
-Sound waves are represented digitally as audio data, most commonly in waveform. The waveform depicts the amplitude of the sound wave. Another possible representation is the audio spectrogram, which represents the frequencies of sound waves. Examples of these two representations are show below.
+Sound waves are represented digitally as audio data, most commonly in waveform. The waveform depicts the amplitude of the sound wave throughout a recording. Another possible representation is the audio spectrogram, which represents the frequencies of sound waves. Examples of these two representations are show below.
 
 In this example we will train a Machine Learning model to recognize spoken words. We will transform waveform sound data into spectrogram image data and so recast the original Audio Classification problem as an Image Classification one.
 
 
 ## features
 
+The Short-Time Fourier Transform (STFT)......
 $$
 \text{STFT}\\{x(t)\\}(\tau, \omega) = X(\tau, \omega) = \int_{-\infty}^{\infty} x(t) w(t-\tau) e^{-i \omega t} \text{d}t
 $$
+where $x(t)$ is the audio signal and $w(\tau)$ is a window function (e.g. Gaussian).
+The STFT $X(\tau, \omega)$ then represents the signal over time ($\tau$) and frequency ($\omega$) domains, and is computed as the Fourier transform of the windowed function $x(t) w(t-\tau)$.
 
 
 
