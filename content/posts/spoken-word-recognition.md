@@ -26,7 +26,7 @@ In this example we will train a Machine Learning model to recognize spoken words
 
 ## features
 
-The Short-Time Fourier Transform (STFT)......
+Given an audio signal $x(t)$ its Short-Time Fourier Transform (STFT)......
 $$
 \text{STFT}\\{x(t)\\}(\tau, \omega) = X(\tau, \omega) = \int_{-\infty}^{\infty} x(t) w(t-\tau) e^{-i \omega t} \text{d}t
 $$
