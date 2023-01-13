@@ -14,8 +14,6 @@ math = true
 
 
 
-# The Vision Transformer Architecture
-
 The [Vision Transformer (ViT)](https://github.com/google-research/vision_transformer) applies Multi-Headed Self-Attention to sequences of image patches to perform image classification tasks. It is a significant milestone in Machine Learning showing that, with only a few tweaks, a modern architecture is able to perform well in both vision and language domains, thus contributing to unifying Computer Vision and Natural Language Processing at the level of the neural network architecture.
 
 The architecture is depicted below and its components are discussed in turn.
@@ -47,6 +45,21 @@ The table below summarizes the patching and embedding process with a concrete ex
 | add class token embedding | $[B, 1+ H' \times W', D]$ |  $[1, 197, 512]$
 
 
+Patchifying an image can be done as follows:
+```python
+def patchify(x, ps, flatten):
+    B, C, H, W = x.shape
+    x = x.reshape(B, C, H // ps, ps, W // ps, ps) # [B, C, H', pH, W', pW]
+    x = x.permute(0, 2, 4, 3, 5, 1)  # [B, H', W', pH, pW, C]
+    x = x.flatten(1, 2)  # [B, H' * W', pH, pW, C]
+    if flatten_pixels:
+        x = x.flatten(2, 4)  # [B, H' * W', C * pH * pW]
+    return x
+```
+
+
+Below we show an example of patching for a 
+{{< figure src="/images/vit/pexels-pixabay-276517-display.png" width="60%" >}}
 
 ##### Transformer
 
