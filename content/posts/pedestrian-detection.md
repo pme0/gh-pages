@@ -1,7 +1,7 @@
 +++
 
 author = "pme0"
-title = "Pedestrian Detection with YOLO"
+title = "Pedestrian Detection"
 date = "2022-01-10"
 description = ""
 tags = [
@@ -60,9 +60,15 @@ The detection framework can be extended to detect more than one class. In the fo
 
 
 
-The model loses accuracy when presented with very distant object, as depicted in the next example. This is due to the training data---which includes mostly larger images of people---as well as the limitations of the multi-scale object detector mechanism used in the YOLO architecture.
-Even on foreground pedestrians the maximum confidence score is around 0.65, which shows a significant reduction in the model's confidence when compared to images where pedestrians are larger.
+The model loses accuracy when presented with very distant object, as depicted in the next example:
 
 {{< figure src="/images/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="60%" >}}
  
+The reason is two-fold: firstly, the training data contains larger instances of pedestrians, and the multi-scale detector is only able to resolve the features up to a point;
+and secondly, the rescaling of the image used for inference (1000x660) to fit the expected input size of the model (640x640) causes a distortion in the case of non-square images.
+A crop of a square region previously containing undetected instances shows that the model performs much better in this case. 
+
+{{< figure src="/images/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="60%" >}}
+ 
+
 

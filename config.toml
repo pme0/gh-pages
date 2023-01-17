@@ -6,7 +6,7 @@ defaultContentLanguage = "en"
 paginate = 20
 # for color styles see https://xyproto.github.io/splash/docs/
 # and for gallery see https://xyproto.github.io/splash/docs/all.html
-pygmentsStyle = "github"
+pygmentsStyle = "monokai"
 pygmentsCodeFences = true
 pygmentsCodeFencesGuessSyntax = true
 enableEmoji = true
