@@ -28,7 +28,6 @@ This means that the sequence to which attention is applied has length $p=196$ (n
 
 Each image patch is then embedded using a linear projection. Additionally, a learnable position embedding is added to each patch (to retain spatial information) and a learnable class embedding is concatenated with the embedded patch sequence (for classification).
 
-**Tensor dimensions.** 
 The input tensor $\bm{X}$ has shape $[B, C, H, W]$ where $B$ is the batch size, $C$ is the number of channels, $H$ is the image height, $W$ is the image width.
 
 *Patching* reshapes each image tensor 
@@ -42,30 +41,6 @@ where $H^{\prime}$ and $W^{\prime}$ are the number of patches in the height and 
 The first dimension has been flattened to a 1D array of patches from of a 2D array (grid of patches) and the second dimension has been flattened to a 1D array of patch pixels from a 3D array (2D grid of patch pixels per channel).
 The total number of patches is $N = H W / P^2$.
 
-*Embedding* linearly projects the patches tensor of shape $[H^{\prime} W^{\prime}, C  P^2]$ to an embedding space of size $D$ and therefore creates an embeded tensor of shape $[H^{\prime} W^{\prime} , D]$. To this tensor is added a learnable position embedding of size $D$ for each patch (which does not alter the tensor shape). And finally, the tensor is concatenated with a learnable class embedding of size $D$, resulting in a tensor of size $[1 + H^{\prime} W^{\prime}, D]$.
-The embedding process can be defined as
-$$
-\bm{z}\_{0} = [\bm{x}\_{\text{class}}, x_{p}^{1} \bm{E}, \dots, x_{p}^{N} \bm{E}] + \bm{E}_{\text{pos}} \in \mathbb{R}^{(1 + H^{\prime} W^{\prime})\times D}
-$$
-where 
-$\bm{x}\_{\text{class}} \in \mathbb{R}^{D}$ is the class embedding; 
-$\bm{x}\_{p}^{k} \in \mathbb{R}^{ C P^2 }$ is the $k$th patch; 
-$\bm{E} \in \mathbb{R}^{C P^2 \times D}$ is the linear projection tensor used to embed the patches; and
-$\bm{E}\_{\text{pos}} \in \mathbb{R}^{(1 + H^{\prime} W^{\prime})\times D}$ is the positional embedding.
-
-The table below summarizes the patching and embedding process with a concrete example for a color image of size $H \times W = 224 \times 224$ with $C=3$ channels, split into square patches of size $P = 16 \times 16$, and embedding size $D=512$. This gives $H^{\prime} = W^{\prime} = 14$.
-
-|  operation  |  output size  | example |
-|:--:|:--:|:--:|
-| input | $[B \times C \times H \times W]$ |  $[1, 3, 224, 224]$
-| patchify input | $[B, H^{\prime} W^{\prime}, C P^2 ]$ |  $[1, 196, 768]$
-| embed patches | $[B, H^{\prime} W^{\prime}, D]$ |  $[1, 196, 512]$
-| add position embedding | $[B, H^{\prime} W^{\prime}, D]$ |  $[1, 196, 512]$
-| append class token embedding | $[B, 1+ H^{\prime} W^{\prime}, D]$ |  $[1, 197, 512]$
-
-
-
-**Visualization.**
 The patching process can be achieved by reshaping the input tensor `x` as follows:
 ```python
 def patchify(X, P, flatten):
@@ -78,9 +53,33 @@ def patchify(X, P, flatten):
     return X
 ```
 
-
-Below we show an example of patching for a  
+and the resulting patched image (before flattening the patches) would look like this:
 {{< figure src="/images/vit/pexels-pixabay-276517-patches.png" width="60%" >}}
+
+
+*Embedding* linearly projects the patches tensor of shape $[H^{\prime} W^{\prime}, C  P^2]$ to an embedding space of size $D$ and therefore creates an embeded tensor of shape $[H^{\prime} W^{\prime} , D]$. To this tensor is added a learnable position embedding of size $D$ for each patch (which does not alter the tensor shape). And finally, the tensor is concatenated with a learnable class embedding of size $D$, resulting in a tensor of size $[1 + H^{\prime} W^{\prime}, D]$.
+The embedding process can be defined as
+$$
+\bm{z}\_{0} = [\bm{x}\_{\text{class}}, x_{p}^{1} \bm{E}, \dots, x_{p}^{N} \bm{E}] + \bm{E}_{\text{pos}}
+$$
+where 
+$\bm{z}\_{0} \in \mathbb{R}^{(1 + H^{\prime} W^{\prime})\times D}$ is the embedded sequence of patches from a single image;
+$\bm{x}\_{\text{class}} \in \mathbb{R}^{D}$ is the class embedding; 
+$\bm{x}\_{p}^{k} \in \mathbb{R}^{ C P^2 }$ is the $k$th patch; 
+$\bm{E} \in \mathbb{R}^{C P^2 \times D}$ is the linear projection tensor used to embed the patches; and
+$\bm{E}\_{\text{pos}} \in \mathbb{R}^{(1 + H^{\prime} W^{\prime})\times D}$ is the positional embedding.
+
+The table below summarizes the patching and embedding processes with a concrete example for a color image of size $H \times W = 224 \times 224$ with $C=3$ channels, split into patches of size $P = 16 \times 16$, and embedding size $D=512$. This gives $H^{\prime} = W^{\prime} = 14$.
+
+|  operation  |  output size  | example |
+|:--:|:--:|:--:|
+| input | $[B \times C \times H \times W]$ |  $[1, 3, 224, 224]$
+| patchify input | $[B, H^{\prime} W^{\prime}, C P^2 ]$ |  $[1, 196, 768]$
+| embed patches | $[B, H^{\prime} W^{\prime}, D]$ |  $[1, 196, 512]$
+| add position embedding | $[B, H^{\prime} W^{\prime}, D]$ |  $[1, 196, 512]$
+| append class token embedding | $[B, 1+ H^{\prime} W^{\prime}, D]$ |  $[1, 197, 512]$
+
+
 
 ##### Transformer
 
@@ -114,7 +113,7 @@ The *softmax* term corresponds to the *attention scores* (scaled and normalised)
 
 **Multi-Headed Self-Attention.**
 The original authors of the [self-attention mechanism](https://arxiv.org/abs/1706.03762) projected the queries, keys and values $h$ times with *different*, learnable linear projections. The embedding is split evenly between the $h$ heads so that $d=D/h$ for each head.
-With multiple attention heads, each head learns a different representation of the same input.
+With multiple attention heads, each head learns a different representation of the same input. 
 
 $$\begin{align*}
 &\bm{Z}\_{i} = \text{Attention}(\bm{Q}\_{i}, \bm{K}\_{i}, \bm{V}\_{i})\\\
