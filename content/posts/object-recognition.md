@@ -18,13 +18,3 @@ math = true
 {{< figure src="/images/object-recognition/cifar10_grid.png" width="25%" >}}
 
 
-## Introduction 
-
-...
-
-
-
-
-## MLP-Mixer
-
-...
