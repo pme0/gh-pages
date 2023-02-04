@@ -14,31 +14,34 @@ math = true
 
 # Introduction
 
-The [Vision Transformer (ViT)](https://github.com/google-research/vision_transformer) applies Multi-Headed Self-Attention to sequences of image patches to perform image classification tasks. It is a significant milestone in Machine Learning showing that, with only a few tweaks, a modern architecture is able to perform well in both vision and language domains, thus contributing to unifying Computer Vision and Natural Language Processing at the level of the neural network architecture.
+The [Vision Transformer (ViT)](https://github.com/google-research/vision_transformer) applies Multi-Headed Self-Attention to sequences of image patches to perform image classification. It is a significant milestone in Machine Learning showing that, with only a few tweaks, a modern architecture is able to perform well in both vision and language domains, thus contributing to unifying Computer Vision and Natural Language Processing at the level of the neural network architecture.
 
 The architecture is depicted below and its components are discussed in turn.
 
-{{< figure src="/images/vit/diagram_ViT.png" width="80%" >}}
+{{< figure src="/media/vit/diagram_ViT.png" width="80%" >}}
 
 
-Applying Transformers to large images is computationally very challenging because the complexity of the Attention mechanism is quadratic in the length of the sequence. Instead of computing attention between image *pixel* sequences, the ViT computes attention between image *patch* sequences, effectively reducing the complexity from $\mathcal{O}(Q^2)$ to $\mathcal{O}(P^2)$ where $Q$ is the number of pixels and $P \ll Q$ is the number of patches.
-To make things simple, patches have a fixed size (usually square) and the image width/height should be divisible by the patch size to avoid padding. For example, for an image of size $224 \times 224$ can be represented by a sequence of $196$ patches of size $16 \times 16$.
-This means that the sequence to which attention is applied has length $P=196$ (number of patches) as opposed to $Q=224^2=50,176$ (number of pixels).
+Applying Transformers to large images is computationally very challenging because the complexity of the Attention mechanism is quadratic in the length of the sequence. 
+Instead of computing attention between image *pixel* sequences, ViT computes attention between image *patch* sequences, effectively reducing the complexity from $\mathcal{O}(M^2)$ to $\mathcal{O}(N^2)$ where $M$ is the number of pixels and $N \ll M$ is the number of patches.
+To make things simple, patches have a fixed size (usually square) and the image width/height should be divisible by the patch size to avoid padding. 
+For example, an image of size $224 \times 224$ can be represented by a sequence of $196$ patches of size $16 \times 16$.
+This means that the sequence to which attention is applied has length $N=196$ in the case of attention over image patches, as opposed to $M=224^2=50,176$ in the case of attention over image pixels.
 
+In the following sections we will go through all the image processing steps and architecture components involved in using a Transformer for Image Classification.
 
 # Patching
 
-The input tensor $\bm{X}$ has shape $[B, C, H, W]$ where $B$ is the batch size, $C$ is the number of channels, $H$ is the image height, $W$ is the image width.
-
-*Patching* reshapes each image tensor 
+Patching, transforms an image into a set of image patches, and is the first step in ViT. A batch of images is represented by tensor of shape $[B, C, H, W]$ where $B$ is the batch size, $C$ is the number of channels, $H$ is the image height, and $W$ is the image width.
+Patching reshapes each image tensor 
 $$
 \bm{x} \in \mathbb{R}^{ C \times H \times W}
 $$ to create a patched tensor 
 $$
 \bm{x}\_{p} \in \mathbb{R}^{ N \times C P^2 }
 $$
-where $H^{\prime}$ and $W^{\prime}$ are the number of patches in the height and width dimension; $P$ is the patch size (in pixels) in both height and width dimensions, i.e. square patches; and $N = H^{\prime} W^{\prime} = H W / P^2$ is the total number of patches.
-The first dimension has been flattened to a 1D array of patches from of a 2D array (grid of patches) and the second dimension has been flattened to a 1D array of patch pixels from a 3D array (2D grid of patch pixels per channel).
+where $P$ is the patch size (in pixels) in both height and width dimensions which yields square patches; $N = H^{\prime} W^{\prime} = H W / P^2$ is the total number of patches; and $H^{\prime}$ and $W^{\prime}$ are the number of patches in the height and width dimension. 
+Note that the first dimension in $\bm{x}\_{p}$ has been flattened to a 1D array of $N$ patches from of a 2D array (grid of patches); and the second dimension in $\bm{x}\_{p}$ has been flattened to a 1D array of patch pixels from a 3D array (2D grid of patch pixels for each channel).
+This process is done for all $B$ images in the batch, so after patching we obtain a patched image tensor of shape $[B, N, C P^2]$.
 
 The patching process can be achieved by reshaping the input tensor `x` as follows:
 ```python
@@ -65,17 +68,17 @@ class Patchify(nn.Module):
 
 After being patchified, each image patch is then embedded using a linear projection. Additionally, a learnable position embedding is added to each patch (to retain spatial information) and a learnable class embedding is concatenated with the embedded patch sequence (for classification).
 
-*Embedding* linearly projects each patch tensor of shape $[N, C  P^2]$ to an embedding space of size $D$ and therefore creates an embeded tensor of shape $[N, D]$. 
+Embedding linearly projects each patch tensor of shape $[N, C  P^2]$ to an embedding space of size $D$ and therefore creates an embeded tensor of shape $[N, D]$. 
 This tensor is then concatenated with a learnable class embedding of size $D$, resulting in a tensor of size $[1 + N, D]$.
 And finally, is added a learnable position embedding, also of size $D$, which does not alter the tensor shape.  
 The embedding process can be defined as
 $$
-\bm{z}\_{0} = [\bm{x}\_{\text{class}}, x_{p}^{1} \bm{E}, \dots, x_{p}^{N} \bm{E}] + \bm{E}_{\text{pos}}
+\bm{z}\_{0} = [\bm{x}\_{\text{class}}, \bm{x}\_{p}^{1} \bm{E}, \dots, \bm{x}\_{p}^{N} \bm{E}] + \bm{E}_{\text{pos}}
 $$
 where 
 $\bm{z}\_{0} \in \mathbb{R}^{(1 + N)\times D}$ is the embedded sequence of patches from a single image;
 $\bm{x}\_{\text{class}} \in \mathbb{R}^{D}$ is the class embedding; 
-$\bm{x}\_{p}^{k} \in \mathbb{R}^{ C P^2 }$ is the $k$th patch; 
+$\bm{x}\_{p}^{k} \in \mathbb{R}^{ C P^2 }$ is the $k$th image patch; 
 $\bm{E} \in \mathbb{R}^{C P^2 \times D}$ is the linear projection tensor used to embed the patches; and
 $\bm{E}\_{\text{pos}} \in \mathbb{R}^{(1 + N)\times D}$ is the positional embedding.
 
@@ -136,28 +139,28 @@ class Embedding(nn.Module):
 
 # An example of patching & embedding
 
-The patching process, shoqn below, splits an image into patches and the embedding process then takes each patch separately and embeds it into a 1D embedding space.
+The patching process---depicted below---splits an image into patches; the embedding process then takes each patch separately and embeds it into a 1D embedding space.
 
-{{< figure src="/images/vit/pexels-pixabay-276517-patches.png" width="60%" >}}
+{{< figure src="/media/vit/pexels-florencia-potter-351300-patches.png" width="80%" >}}
 
 
 Below we give a concrete example for a color image of size $H \times W = 224 \times 224$ with $C=3$ channels, split into square patches of size $P = 16$, and embedding size $D=512$. This gives the same number of patches in each dimension $H^{\prime} = W^{\prime} = 14$, for a total number of patches $N = H^{\prime} \times W^{\prime} = 196$.
 The table summarizes the tensor dimensions throughout the patching and embedding processes:
 
-|  layer  |  input shape  |  output shape  |  example output  |
+|  layer  |  input shape  |  output shape  |  output example  |
 |:--:|:--:|:--:|:--:|
 | input | - | $[B \times C \times H \times W]$ | $[1, 3, 224, 224]$ |
 | patchify | $[B \times C \times H \times W]$ | $[B, N, C P^2 ]$ | $[1, 196, 768]$ |
-| linearly embedding | $[B, N, C P^2 ]$ |  $[B, N, D]$ | $[1, 196, 512]$ |
-| append class token embedding | $[B, N, D]$ | $[B, 1+N, D]$ |  $[1, 197, 512]$ |
+| linear embedding | $[B, N, C P^2 ]$ |  $[B, N, D]$ | $[1, 196, 512]$ |
+| append class embedding | $[B, N, D]$ | $[B, 1+N, D]$ |  $[1, 197, 512]$ |
 | add positional embedding | $[B, 1+N, D]$ | $[B, 1+N, D]$ |  $[1, 197, 512]$ |
 
 
 
-and we can confirm the dimensions using PyTorch *Forward Hooks*:
+and we can confirm that the dimensions are as expected:
 ```python
 # define parameters
-image_size = (224,224)   # W, H
+image_size = (224,224)   # (W,H)
 num_channels = 3         # C
 patch_size = 16          # P
 embed_dim = 512          # D
@@ -181,11 +184,12 @@ h3 = embed.class_embedding.register_forward_hook(getShape('class_embedding'))
 h4 = embed.positional_embedding.register_forward_hook(getShape('positional_embedding'))
 
 # run forward pass to collect data from hooks
-x = torch.ones((batch_size, num_channels, image_size[0], image_size[1]))
-shapes["input"] = (tuple(x.shape), tuple(x.shape))
+x_shape = (batch_size, num_channels, image_size[0], image_size[1])
+x = torch.zeros(x_shape)
+shapes["input"] = (tuple(x_shape), tuple(x_shape))
 y = embed(patchify(x))
 ```
-The dictionary `shapes` contains the shape of input and output tensors to each hooked layer:
+The dictionary `shapes` contains the shape of input and output tensors to each layer:
 ```python
 {
     'patchify': ((1, 3, 224, 224), (1, 196, 768)),
@@ -198,16 +202,24 @@ The dictionary `shapes` contains the shape of input and output tensors to each h
 
 # Transformer
 
-The ViT uses [Multi-Headed Self-Attention (MHSA)](https://arxiv.org/abs/1706.03762). 
-The self-attention mechanism is the central component of the transformer. It models the interactions between entities in a sequence as described below.
-The goal of self-attention is to capture the interaction amongst $n$ entities by encoding each entity in terms of the global contextual information.
+The original Transformer aimed to solve language tasks such as machine translation and contained both encoder and decoder blocks. In contrast, the ViT architecture used for vision tasks such as image recognition contains an encoder block but no decoder.
+In the following we will go through the three key layers of the Transformer encoder in ViT: attention, linear, and normalization.
 
-Let $\bm{X} \in \mathbb{R}^{N \times D}$ denote a sequence of $N$ tokens $(\bm{x}\_{1},\dots,\bm{x}\_{N})$, where $D$ is the dimension of the embedding/token used to represent each entity.
+
+### Attention Layer
+
+The ViT uses the same [Multi-Headed Self-Attention (MHSA)](https://arxiv.org/abs/1706.03762) mechanism proposed in the Transformer architecture. 
+Self-attention is the central component of the transformer. It models the interactions between entities in a sequence as described below.
+
+
+##### How does attention work?
+
+
+Let $\bm{X} \in \mathbb{R}^{N \times D}$ denote a sequence of $N$ tokens $(\bm{x}\_{1},\dots,\bm{x}\_{N})$, where $D$ is the dimension of the embedding/token used to represent each entity (i.e. a word or an image patch).
 A *token* here is an embedding of an image patch. The batch size $B$ is omitted for simplicity, and so $N$ denotes the sequence length of one sample (number of patches per image), not the number of sequences (number of images).
 
 **Self-Attention.**
-To capture the interaction amongst the $N$ entities we define three learnable weight matrices to transform entities into 
-*Queries*, *Keys* and *Values* (respectively $\bm{W}\_{Q}, \bm{W}\_{K}, \bm{W}\_{V} \in \mathbb{R}^{D \times d}$). 
+To capture the interaction amongst the $N$ entities using attention, we define three learnable weight matrices to transform entities into *queries*, *keys* and *values* (respectively $\bm{W}\_{Q}, \bm{W}\_{K}, \bm{W}\_{V} \in \mathbb{R}^{D \times d}$). 
 The input sequence $\bm{X}$ is first projected onto these weight matrices to obtain 
 $$\begin{align*}
     \bm{Q} &= \bm{X} \bm{W}\_{Q} \\\
@@ -224,10 +236,16 @@ $$\bm{Z}
 $$
 with $\bm{Z} \in \mathbb{R}^{N \times d}$.
 The *softmax* term corresponds to the *attention scores* (scaled and normalised): if the dot product $\bm{Q} \bm{K}^{T}$ is large for two given entities, they co-occur often and their attention score is high.
+The MHSA mechanism is depicted schematically below:
+
+{{< figure src="/media/vit/diagram_MHSA.png" width="60%" >}}
+
+In self-attention, all of keys, values and queries are computed from the same input, namely the patch embedding (in the first encoder layer) or the output of the previous encoder block. 
+This attention mechanism is exhaustive in that each position in the encoded token sequence attends to all positions in the previous layer of the encoder---thus the quadratic complexity of the self-attention mechanism, $\mathcal{O}(P)$.
 
 
 **Multi-Headed Self-Attention.**
-The original authors of the [self-attention mechanism](https://arxiv.org/abs/1706.03762) projected the queries, keys and values $h$ times with *different*, learnable linear projections. The embedding is split evenly between the $h$ heads so that $d=D/h$ for each head.
+The [self-attention](https://arxiv.org/abs/1706.03762) mechanism projects the queries, keys and values $h$ times with *different*, learnable, linear projections.
 With multiple attention heads, each head learns a different representation of the same input. 
 
 $$\begin{align*}
@@ -240,17 +258,24 @@ $\bm{Q}\_{i}, \bm{K}\_{i}, \bm{V}\_{i} \in  \mathbb{R}^{D \times d}$;
 head scores $\bm{Z}\_{i} \in  \mathbb{R}^{N \times d}$;
 concatenated scores $\bar{\bm{Z}} \in  \mathbb{R}^{N \times D}$;
 output weight matrix $\bar{\bm{W}} \in  \mathbb{R}^{D \times D}$; 
-output representation $\bm{Z} \in  \mathbb{R}^{N \times D}$; 
-and $h$ is the number of attention heads ($d=D/h$).
-The MHSA mechanism is depicted schematically below:
-
-{{< figure src="/images/vit/diagram_MHSA.png" width="60%" >}}
+output representation $\bm{Z} \in  \mathbb{R}^{N \times D}$;
+$h$ is the number of attention heads;
+and by default we set $d=D/h$.
 
 
+##### What does attention do?
 
-**Linear Layer.** ...
+... 
+The goal of self-attention is to capture the interaction amongst $N$ entities by encoding each entity in terms of the global contextual information.
 
-**Normalization Layer.** ...
+
+### Linear Layer
+
+...
+
+
+
+### Normalization Layer
 
 
 The transformer can then be defined as 
@@ -259,6 +284,32 @@ $$\begin{align*}
 \bm{z}\_{l} &= \text{MLP}\_{\text{att}}(\text{LN}(\bm{z}\_{l}^{\prime})) + \bm{z}\_{l}^{\prime} \\\
 \end{align*}$$
 where $l=\\{1,\dots,L\\}$ is the layer index; ....
+
+
+```python
+class AttentionBlock(nn.Module):
+    """Multi-Headed Self-Attention block"""
+    def __init__(self, embed_dim, mlp_dim, num_heads, dropout):
+        super().__init__()
+        self.layer_norm_1 = nn.LayerNorm(embed_dim)
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads)
+        self.layer_norm_2 = nn.LayerNorm(embed_dim)
+        self.linear = nn.Sequential(
+            nn.Linear(embed_dim, mlp_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(mlp_dim, embed_dim),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x):
+        x_norm = self.layer_norm_1(x)
+        x += self.attention(x_norm, x_norm, x_norm)[0]
+        x_norm = self.layer_norm_2(x)
+        x += self.linear(x_norm)
+        return x
+```
+
 
 
 # Classifier
@@ -271,9 +322,10 @@ where $\bm{y}$ ........ ; $\bm{z}\_{L}^{0}$ is the image representation to each 
 
 
 
-# Trainable Parameters
+# Model Size
 
-The number of parameters in the patching and embedding process is:
+We can measure the model size using the number of trainable parameters
+
 ```python
 def count_params(layers):
     total_params = 0
@@ -282,19 +334,36 @@ def count_params(layers):
         total_params += params
         print("{}: {:,}".format(eval(layer).__class__.__name__, params))
     print("Total: {:,}".format(total_params))
-        
+```
+
+The patching and embedding require a total of 495,104 parameters, with the linear embedding layer being responsible for the large majority. In the transformer encoder.........
+```python  
 layers = ["patchify", "embed.linear_embedding", 
     "embed.class_embedding", "embed.positional_embedding"]
 count_params(layers)
+
+
 ```
-
-gives a total of 495,104 parameters. The Linear Embedding layer is responsible for most of those:
-
 {{< highlight python "hl_lines=5" >}}
 Patchify: 0
-Linear: 393,728
+LinearEmbedding: 393,728
 ClassEmbedding: 512
 PositionalEmbedding: 100,864
 Total: 495,104
 {{< / highlight >}}
+
+
+```python  
+
+```
+
+
+
+|  Layer  |  Parameters  |
+|:--|:--:|
+| Patchify | 0 |
+| Embedding | 495,104  |
+| Transformer  | ?  | 
+| Classifier   | ?  | 
+| **TOTAL** |  **???**  |
 

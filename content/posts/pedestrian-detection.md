@@ -15,15 +15,20 @@ math = true
 
 
 
-{{< figure src="/images/pedestrian-detection/thumbnail_pedestrians.png" width="25%" >}}
+
+<iframe src="/media/out.mp4"
+        scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+{{< figure src="/media/pedestrian-detection/thumbnail_pedestrians.png" width="35%" >}}
 
 
 ## Introduction
 
-
+...
 
 ## Model
 
+...
 
 ## Inference
 
@@ -51,24 +56,35 @@ tensor([[2.42451e+02, 2.63408e+02, 3.22044e+02, 4.49350e+02, 9.22621e-01, 0.0000
 
 In the following **single object detection** example we detect pedestrians:
 
-{{< figure src="/images/pedestrian-detection/pexels-kate-trifo-4019405_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes.png" width="60%" >}}
 
 
 The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bycicles and cars:
 
-{{< figure src="/images/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
 
 
 
 The model loses accuracy when presented with very distant object, as depicted in the next example:
 
-{{< figure src="/images/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="60%" >}}
  
 The reason is two-fold: firstly, the training data contains larger instances of pedestrians, and the multi-scale detector is only able to resolve the features up to a point;
 and secondly, the rescaling of the image used for inference (1000x660) to fit the expected input size of the model (640x640) causes a distortion in the case of non-square images.
 A crop of a square region previously containing undetected instances shows that the model performs much better in this case. 
 
-{{< figure src="/images/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="60%" >}}
  
+Alternatively, the confidence threshold can be decreasing so that less confident prediction are not excluded, which typically happens to very small objects.
+We can see an example of this approach in the following image. With a high threshold only the larger instances are picked up
 
+{{< figure src="/media/pedestrian-detection/pedestrians_abrd_conf90.png" width="60%" >}}
 
+whereas with a low threshold the model is able to pick up even the three very small and well camouflaged observers in the background on th left side of the road---impressive!
+{{< figure src="/media/pedestrian-detection/pedestrians_abrd_conf3.png" width="60%" >}}
+
+{{< figure src="/media/pedestrian-detection/pedestrians_abrd-crop.png" width="80%" >}}
+
+Inference can be easily extended to video clips. ................
+
+{{< video src="/media/pedestrian-detection/out.mp4" type="video/mp4" preload="auto" >}}
