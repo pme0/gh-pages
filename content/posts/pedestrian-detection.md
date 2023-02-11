@@ -24,7 +24,10 @@ math = true
 
 ## Introduction
 
-...
+*Pedestrian Detection* is a specific application of a larger group of tasks in 
+
+In the following we present some examples of....
+
 
 ## Model
 
@@ -34,13 +37,17 @@ math = true
 
 The most important inference hyperparameters are the *confidence threshold* determining the minimum confidence for a sucessful detection, and the *IoU threshold* determining the intersection of union for considering proximal bounding boxes as different objects. Additionally, a *class filter* can be used to exclude unwanted object classes from the detections. The standard *non max suppression* is applied in order to clean-up the raw detections produces by the model:
 ```python
-conf_thres = 0.20
+# detection parameters
+conf_thres = 0.25
 iou_thres=0.45
-classes = [0]  # class '0' corresponds to 'person'
+classes = [0]
 
+# detection outputs
 predictions = model(images)
 predictions = non_max_suppression(predictions, conf_thres, iou_thres, classes)
 ```
+The list `class` defines the set of objects to be detected, with '0' in this example corresponding to 'person'. This must be one of the classes of objects that the model has been trained on.
+
 The model returns a set predictions, each representing a detection where the first four elements are the bounding box coordinates and the last two are the confidence score and the class index, respectively:
 ```python
 tensor([[2.42451e+02, 2.63408e+02, 3.22044e+02, 4.49350e+02, 9.22621e-01, 0.00000e+00],
@@ -56,10 +63,10 @@ tensor([[2.42451e+02, 2.63408e+02, 3.22044e+02, 4.49350e+02, 9.22621e-01, 0.0000
 
 In the following **single object detection** example we detect pedestrians:
 
-{{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes_0.png" width="60%" >}}
 
 
-The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bycicles and cars:
+The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bicycles and cars:
 
 {{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
 
@@ -67,24 +74,24 @@ The detection framework can be extended to detect more than one class. In the fo
 
 The model loses accuracy when presented with very distant object, as depicted in the next example:
 
-{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="80%" >}}
  
 The reason is two-fold: firstly, the training data contains larger instances of pedestrians, and the multi-scale detector is only able to resolve the features up to a point;
 and secondly, the rescaling of the image used for inference (1000x660) to fit the expected input size of the model (640x640) causes a distortion in the case of non-square images.
 A crop of a square region previously containing undetected instances shows that the model performs much better in this case. 
 
-{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="80%" >}}
  
 Alternatively, the confidence threshold can be decreasing so that less confident prediction are not excluded, which typically happens to very small objects.
-We can see an example of this approach in the following image. With a high threshold only the larger instances are picked up
+We can see an example of this approach in the following image. With a high threshold only the instances for which the model is very certain are picked up
 
 {{< figure src="/media/pedestrian-detection/pedestrians_abrd_conf90.png" width="60%" >}}
 
-whereas with a low threshold the model is able to pick up even the three very small and well camouflaged observers in the background on th left side of the road---impressive!
+whereas with a low threshold the model is able to pick up even the three very small and well camouflaged observers in the background on the left side of the road---impressive!
 {{< figure src="/media/pedestrian-detection/pedestrians_abrd_conf3.png" width="60%" >}}
 
 {{< figure src="/media/pedestrian-detection/pedestrians_abrd-crop.png" width="80%" >}}
 
-Inference can be easily extended to video clips. ................
+Lastly, inference can be easily extended to video clips.
 
 {{< video src="/media/pedestrian-detection/out.mp4" type="video/mp4" preload="auto" >}}
