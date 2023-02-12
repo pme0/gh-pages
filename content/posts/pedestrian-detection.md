@@ -24,14 +24,27 @@ math = true
 
 ## Introduction
 
+{{< video src="/media/pedestrian-detection/pexels-people-walking-2670-cut_bboxes.mp4" type="video/mp4" preload="auto" >}}
+
 *Pedestrian Detection* is a specific application of a larger group of tasks in 
 
-In the following we present some examples of....
+Detecting pedestrians is an important area of application for Artificial Intelligence. Some examples include:
+- **public safety:** monitoring overcrowding at public events or in closed public spaces---such as underground stations and tight pedestrian areas---where emergency exits are limited and/or overcrowding can lead to panic, stampedes and crushes (e.g. Seoul Halloween crowd crush in 2022);
+- **road safety:** ensuring autonomous vehicles are aware of pedestrians---such as people crossing the road or exiting parked cars---and are able to take emergency action if a dangerous situation arises.
 
+In the following we give some examples of pedestrian detection using a detector and a visualizer for
 
 ## Model
 
-...
+[YOLOv5](https://github.com/ultralytics/yolov5)
+
+YOLOv5 has three main components:
+1. **Backbone** using a combination of cross stage partial network (CSPNet) and Darknet which is termed CSPDarknet and which works as a *feature extraction* network;
+2. **Neck** using a path aggregation network (PANet) which works as a *feature fusion* network;
+3. **Head** using a convolutional network which works as a *multi-scale detector* network by outputting feature maps of different sizes;
+
+Some diagrams illustrating the overall network architecture can be found [here](https://github.com/ultralytics/yolov5/issues/280)
+
 
 ## Inference
 
@@ -59,17 +72,15 @@ tensor([[2.42451e+02, 2.63408e+02, 3.22044e+02, 4.49350e+02, 9.22621e-01, 0.0000
 
 
 
-## Results
+## Visualization
 
 In the following **single object detection** example we detect pedestrians:
 
 {{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes_0.png" width="60%" >}}
 
+In some situation we may wish to safeguard privacy while still being able to monitor pedestrians, in which case a bluring filter can be applied:
 
-The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bicycles and cars:
-
-{{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
-
+{{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes_0_blur.png" width="60%" >}}
 
 
 The model loses accuracy when presented with very distant object, as depicted in the next example:
@@ -92,6 +103,14 @@ whereas with a low threshold the model is able to pick up even the three very sm
 
 {{< figure src="/media/pedestrian-detection/pedestrians_abrd-crop.png" width="80%" >}}
 
-Lastly, inference can be easily extended to video clips.
+The optimal value for the Confidence and IoU thresholds will depend on the primary objective of the application. For example, in applications where detecting the number of pedestrians is critical for safety reasons and crowds may form---thus causing partial oclusions---we want to lower both Confidence and IoU thresholds; the cost of overestimation is negligible in this scenario, compared to the risks of overcrowing. In contrast, if the application demands focus on the foreground, we want higher Confidence threshold in order to abstract from the background 
 
-{{< video src="/media/pedestrian-detection/out.mp4" type="video/mp4" preload="auto" >}}
+
+
+## Conclusions
+
+......
+
+The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bicycles and cars:
+
+{{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
