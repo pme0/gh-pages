@@ -19,22 +19,24 @@ math = true
 <iframe src="/media/out.mp4"
         scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
-{{< figure src="/media/pedestrian-detection/thumbnail_pedestrians.png" width="35%" >}}
-
-
-## Introduction
-
 {{< video src="/media/pedestrian-detection/pexels-people-walking-2670-cut_bboxes.mp4" type="video/mp4" preload="auto" >}}
+
 
 *Pedestrian Detection* is a specific application of a larger group of tasks in 
 
+
+{{< figure src="/media/pedestrian-detection/thumbnail_pedestrians.png" width="35%" >}}
+
+
+
 Detecting pedestrians is an important area of application for Artificial Intelligence. Some examples include:
 - **public safety:** monitoring overcrowding at public events or in closed public spaces---such as underground stations and tight pedestrian areas---where emergency exits are limited and/or overcrowding can lead to panic, stampedes and crushes (e.g. Seoul Halloween crowd crush in 2022);
-- **road safety:** ensuring autonomous vehicles are aware of pedestrians---such as people crossing the road or exiting parked cars---and are able to take emergency action if a dangerous situation arises.
+- **road safety:** ensuring autonomous vehicles are aware of pedestrians---such as people crossing the road or exiting parked cars---and are able to take emergency action if a dangerous situation arises;
+- **human-robit interaction:** As AI and Robots become more prevalent, so will interactions between humans and machines, and it is therefore important for machines to be aware of sorrounding humans, for example when human and robots share working spaces or even work together in certain tasks;
 
-In the following we give some examples of pedestrian detection using a detector and a visualizer for
+In the following we analyze some examples of pedestrian detection using a detector and a visualizer for
 
-## Model
+
 
 [YOLOv5](https://github.com/ultralytics/yolov5)
 
@@ -113,4 +115,4 @@ The optimal value for the Confidence and IoU thresholds will depend on the prima
 
 The detection framework can be extended to detect more than one class. In the following **multiple object detection** example we detect pedestrians as well as bicycles and cars:
 
-{{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="60%" >}}
+{{< figure src="/media/pedestrian-detection/pexels-aleks-magnusson-2962589_bboxes.png" width="70%" >}}
