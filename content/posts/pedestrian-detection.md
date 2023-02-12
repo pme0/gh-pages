@@ -34,7 +34,7 @@ Detecting pedestrians is an important area of application for Artificial Intelli
 - **road safety:** ensuring autonomous vehicles are aware of pedestrians---such as people crossing the road or exiting parked cars---and are able to take emergency action if a dangerous situation arises;
 - **human-robit interaction:** As AI and Robots become more prevalent, so will interactions between humans and machines, and it is therefore important for machines to be aware of sorrounding humans, for example when human and robots share working spaces or even work together in certain tasks;
 
-In the following we analyze some examples of pedestrian detection using a detector and a visualizer for
+In the following we analyze some examples of pedestrian detection using a detector and a visualizer. The code can be found in 
 
 
 
