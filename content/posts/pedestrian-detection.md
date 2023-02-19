@@ -1,7 +1,7 @@
 +++
 
 author = "pme0"
-title = "Pedestrian Detection"
+title = "Object Detection"
 date = "2022-01-10"
 description = ""
 tags = [
@@ -21,8 +21,10 @@ math = true
 
 {{< video src="/media/pedestrian-detection/pexels-people-walking-2670-cut_bboxes.mp4" type="video/mp4" preload="auto" >}}
 
+## Object Detection
 
-*Pedestrian Detection* is a specific application of a larger group of tasks in 
+
+## Pedestrian Detection
 
 
 {{< figure src="/media/pedestrian-detection/thumbnail_pedestrians.png" width="35%" >}}
@@ -85,12 +87,13 @@ In some situation we may wish to safeguard privacy while still being able to mon
 {{< figure src="/media/pedestrian-detection/pexels-kate-trifo-4019405_bboxes_0_blur.png" width="60%" >}}
 
 
-The model loses accuracy when presented with very distant object, as depicted in the next example:
+The model performs when large objects are present but loses accuracy when presented with distant object, as depicted in the next example:
 
 {{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808_bboxes.png" width="80%" >}}
  
-The reason is two-fold: firstly, the training data contains larger instances of pedestrians, and the multi-scale detector is only able to resolve the features up to a point;
-and secondly, the rescaling of the image used for inference (1000x660) to fit the expected input size of the model (640x640) causes a distortion in the case of non-square images.
+The reason is two-fold: 
+Firstly, the training data contains larger instances of pedestrians, and the multi-scale detector is only able to resolve the features up to a point. This is a common problem in small-object detection tasks.
+Secondly, the rescaling of the image to fit the expected input size of the model (from 1000x660 to 640x640) causes a distortion in the case of non-square input images.
 A crop of a square region previously containing undetected instances shows that the model performs much better in this case. 
 
 {{< figure src="/media/pedestrian-detection/pexels-luis-dalvan-1770808-detail.jpg" width="80%" >}}

@@ -14,7 +14,7 @@ math = true
 
 # Introduction
 
-The [Vision Transformer (ViT)](https://github.com/google-research/vision_transformer) applies Multi-Headed Self-Attention to sequences of image patches to perform image classification. It is a significant milestone in Machine Learning showing that, with only a few tweaks, a modern architecture is able to perform well in both vision and language domains, thus contributing to unifying Computer Vision and Natural Language Processing at the level of the neural network architecture.
+The [Vision Transformer](https://github.com/google-research/vision_transformer) applies [Multi-Headed Self-Attention](https://arxiv.org/abs/1706.03762) to sequences of image patches to perform image classification. It is a significant milestone in Machine Learning showing that, with only a few tweaks, a modern architecture is able to perform well in both vision and language domains, thus contributing to unifying Computer Vision and Natural Language Processing at the level of the neural network architecture.
 
 The architecture is depicted below and its components are discussed in turn.
 
@@ -27,7 +27,7 @@ To make things simple, patches have a fixed size (usually square) and the image 
 For example, an image of size $224 \times 224$ can be represented by a sequence of $196$ patches of size $16 \times 16$.
 This means that the sequence to which attention is applied has length $N=196$ in the case of attention over image patches, as opposed to $M=224^2=50,176$ in the case of attention over image pixels.
 
-In the following sections we will go through all the image processing steps and architecture components involved in using a Transformer for Image Classification.
+In the following sections we will go through all the image processing steps and architecture components involved in using a Transformer for Object Recognition.
 
 # Patching
 
@@ -229,7 +229,7 @@ $$\begin{align*}
 with 
 $\bm{Q}, \bm{K}, \bm{V} \in \mathbb{R}^{N \times d}$.
 Usually $d < D$, that is, the dimensions of the representation is smaller than the dimension of the original embedding.
-The output of the self attention layer is then given by
+The output of the self-attention layer is then given by
 $$\bm{Z} 
     = \text{Attention}(\bm{Q},\bm{K},\bm{V})
     = \text{softmax}\left( \frac{\bm{Q} \bm{K}^{T}}{\sqrt{d}} \right) \bm{V}
@@ -241,12 +241,12 @@ The MHSA mechanism is depicted schematically below:
 {{< figure src="/media/vit/diagram_MHSA.png" width="60%" >}}
 
 In self-attention, all of keys, values and queries are computed from the same input, namely the patch embedding (in the first encoder layer) or the output of the previous encoder block. 
-This attention mechanism is exhaustive in that each position in the encoded token sequence attends to all positions in the previous layer of the encoder---thus the quadratic complexity of the self-attention mechanism, $\mathcal{O}(P)$.
+This attention mechanism is exhaustive in that each position in the encoded token sequence attends to all positions in the previous layer of the encoder---thus the quadratic complexity of the self-attention mechanism, $\mathcal{O}(N^{2})$.
 
 
 **Multi-Headed Self-Attention.**
-The [self-attention](https://arxiv.org/abs/1706.03762) mechanism projects the queries, keys and values $h$ times with *different*, learnable, linear projections.
-With multiple attention heads, each head learns a different representation of the same input. 
+The multi-headed self-attention mechanism extends self-attention to project the queries, keys and values multiple times with *different*, learnable, linear projections.
+With multiple attention heads, each head learns a different representation for the same input, and the multiple representations are then concatenated are further projected:
 
 $$\begin{align*}
 &\bm{Z}\_{i} = \text{Attention}(\bm{Q}\_{i}, \bm{K}\_{i}, \bm{V}\_{i})\\\
@@ -325,6 +325,8 @@ where $\bm{y}$ ........ ; $\bm{z}\_{L}^{0}$ is the image representation to each 
 # Model Size
 
 We can measure the model size using the number of trainable parameters
+
+[specify parameters used]
 
 ```python
 def count_params(layers):
